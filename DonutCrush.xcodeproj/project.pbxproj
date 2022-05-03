@@ -11,6 +11,8 @@
 		35CA8BA42818F13100C44334 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35CA8BA32818F13100C44334 /* ContentView.swift */; };
 		35CA8BA62818F13C00C44334 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35CA8BA52818F13C00C44334 /* Assets.xcassets */; };
 		35CA8BA92818F13C00C44334 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35CA8BA82818F13C00C44334 /* Preview Assets.xcassets */; };
+		35CA8BB2281AFD8E00C44334 /* game.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35CA8BB1281AFD8E00C44334 /* game.swift */; };
+		35E320DF281C5DFB003F72C8 /* StartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E320DE281C5DFB003F72C8 /* StartView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +22,8 @@
 		35CA8BA52818F13C00C44334 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		35CA8BA82818F13C00C44334 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		35CA8BAA2818F13C00C44334 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		35CA8BB1281AFD8E00C44334 /* game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = game.swift; sourceTree = "<group>"; };
+		35E320DE281C5DFB003F72C8 /* StartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +61,8 @@
 				35CA8BA52818F13C00C44334 /* Assets.xcassets */,
 				35CA8BAA2818F13C00C44334 /* Info.plist */,
 				35CA8BA72818F13C00C44334 /* Preview Content */,
+				35CA8BB1281AFD8E00C44334 /* game.swift */,
+				35E320DE281C5DFB003F72C8 /* StartView.swift */,
 			);
 			path = DonutCrush;
 			sourceTree = "<group>";
@@ -138,8 +144,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				35CA8BB2281AFD8E00C44334 /* game.swift in Sources */,
 				35CA8BA42818F13100C44334 /* ContentView.swift in Sources */,
 				35CA8BA22818F13100C44334 /* DonutCrushApp.swift in Sources */,
+				35E320DF281C5DFB003F72C8 /* StartView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
