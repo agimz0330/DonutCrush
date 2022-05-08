@@ -13,6 +13,8 @@
 		35CA8BA92818F13C00C44334 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35CA8BA82818F13C00C44334 /* Preview Assets.xcassets */; };
 		35CA8BB2281AFD8E00C44334 /* game.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35CA8BB1281AFD8E00C44334 /* game.swift */; };
 		35E320DF281C5DFB003F72C8 /* StartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35E320DE281C5DFB003F72C8 /* StartView.swift */; };
+		35E320E828211252003F72C8 /* PWYummyDonuts.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 35E320E728211252003F72C8 /* PWYummyDonuts.ttf */; };
+		35E320EC28211B15003F72C8 /* MAGIC WORLD.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 35E320EB28211B15003F72C8 /* MAGIC WORLD.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +26,8 @@
 		35CA8BAA2818F13C00C44334 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		35CA8BB1281AFD8E00C44334 /* game.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = game.swift; sourceTree = "<group>"; };
 		35E320DE281C5DFB003F72C8 /* StartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartView.swift; sourceTree = "<group>"; };
+		35E320E728211252003F72C8 /* PWYummyDonuts.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = PWYummyDonuts.ttf; sourceTree = "<group>"; };
+		35E320EB28211B15003F72C8 /* MAGIC WORLD.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "MAGIC WORLD.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +67,8 @@
 				35CA8BA72818F13C00C44334 /* Preview Content */,
 				35CA8BB1281AFD8E00C44334 /* game.swift */,
 				35E320DE281C5DFB003F72C8 /* StartView.swift */,
+				35E320E728211252003F72C8 /* PWYummyDonuts.ttf */,
+				35E320EB28211B15003F72C8 /* MAGIC WORLD.ttf */,
 			);
 			path = DonutCrush;
 			sourceTree = "<group>";
@@ -132,7 +138,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				35E320EC28211B15003F72C8 /* MAGIC WORLD.ttf in Resources */,
 				35CA8BA92818F13C00C44334 /* Preview Assets.xcassets in Resources */,
+				35E320E828211252003F72C8 /* PWYummyDonuts.ttf in Resources */,
 				35CA8BA62818F13C00C44334 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
