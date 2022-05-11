@@ -24,45 +24,62 @@ struct ContentView: View {
         DragGesture(minimumDistance: 10)
             .onChanged { (value) in
                 if abs(value.translation.width) > abs(value.translation.height){ // 水平
-                    
+                    // 限制移動的距離
                     if value.translation.width > 40{
-                        offset.width = previousOffset.width + 40
+                        game.donuts[r][c].offset.width = 40
                     }
                     else if value.translation.width < -40{
-                        offset.width = previousOffset.width - 40
+                        game.donuts[r][c].offset.width = -40
                     }
                     else{
-                        offset.width = previousOffset.width + value.translation.width
+                        game.donuts[r][c].offset.width = value.translation.width
                     }
                     
-                    if value.translation.width > 0{ // ->
-                        offset2.width = -offset.width
+                    if value.translation.width > 0 && c < game.boardCol-1{ // ->
+                        game.donuts[r][c].direction = Direction.right
+                        game.donuts[r][c+1].offset.width = -game.donuts[r][c].offset.width
                     }
-                    else{ // <-
-                        
+                    else if value.translation.width < 0 && c > 0{ // <-
+                        game.donuts[r][c].direction = Direction.left
+                        game.donuts[r][c-1].offset.width = -game.donuts[r][c].offset.width
                     }
                 }
-                else{
-                    if value.translation.height > 0{ // 上
-                        
-                    }
-                    else{ // 下
-                        
-                    }
+                else{ // 垂直
+                    
                     if value.translation.height > 40{
-                        offset.height = previousOffset.height + 40
+                        game.donuts[r][c].offset.height = 40
                     }
                     else if value.translation.height < -40{
-                        offset.height = previousOffset.height - 40
+                        game.donuts[r][c].offset.height = -40
                     }
                     else{
-                        offset.height = previousOffset.height + value.translation.height
+                        game.donuts[r][c].offset.height = value.translation.height
+                    }
+                    
+                    if value.translation.height < 0 && r > 0{ // 上
+                        game.donuts[r][c].direction = Direction.up
+                        game.donuts[r-1][c].offset.height = -game.donuts[r][c].offset.height
+                    }
+                    else if value.translation.height > 0 && r < game.boardRow-1{ // 下
+                        game.donuts[r][c].direction = Direction.down
+                        game.donuts[r+1][c].offset.height = -game.donuts[r][c].offset.height
                     }
                 }
             }
             .onEnded { (value) in
-                previousOffset = offset
-                previousOffset2 = offset2
+                if game.canSwipe(row: r, col: c){ // 可以交換
+                    game.doSwipe(row: r, col: c)
+                }
+                else{ // 不能交換
+                    withAnimation(.easeInOut(duration: 0.3)){
+                        // 將四周格子offset調回原本位置
+                        game.donuts[r][c].offset = .zero
+                        if c < game.boardCol-1 {game.donuts[r][c+1].offset = .zero}
+                        if c > 0 {game.donuts[r][c-1].offset = .zero}
+                        if r > 0 {game.donuts[r-1][c].offset = .zero}
+                        if r < game.boardRow-1 {game.donuts[r+1][c].offset = .zero}
+                    }
+                }
             }
     }
     
@@ -72,29 +89,40 @@ struct ContentView: View {
             
             VStack{ // content
                 
-                ZStack{
+                ZStack{ // 分數
                     Image("scoreboard")
                         .scaleEffect(1.5)
                     Text("\(game.score)") // 分數
                         .font((.custom("PWYummyDonuts", size: 40)))
                         .foregroundColor(rootBear_color)
+                        .offset(x: 5, y: 5)
                     
                     HStack{
-                        Button(action: {
+                        Button(action: { // 重新洗牌
+                            withAnimation(.easeInOut(duration: 1)){
+                                game.randomBoard()
+                            }
+                        }, label: {
+                            Image(systemName: "shuffle")
+                                .font(.largeTitle)
+                                .foregroundColor(brown_bg)
+                        })
+                        
+                        Button(action: { // 暫停
                             game.stopTimer()
                             stateStr = "pause"
                             showStartView = true
                         }, label: {
                             Image(systemName: "pause.fill")
                                 .font(.largeTitle)
-                                .foregroundColor(.pink)
+                                .foregroundColor(brown_bg)
                         })
                     }
                     .offset(x: 130, y: -40)
                 }
                 
                 
-                VStack(spacing: 0){ // 遊戲介面
+                VStack(spacing: 0){ // 遊戲介面(格子)
                     
                     ForEach(0..<game.boardRow){ row in
                         HStack(spacing: 0){
@@ -106,11 +134,13 @@ struct ContentView: View {
                                         .border(cream_color)
                                         .opacity(0.6)
 
-                                    Image("donut\(game.donuts[row][col].value)")
-                                        .resizable()
-                                        .frame(width: 40, height: 40)
-                                        .offset(game.donuts[row][col].offset)
-                                        .gesture(dragGesture(r: row, c: col))
+                                    if game.donuts[row][col].value > 0{
+                                        Image("donut\(game.donuts[row][col].value)")
+                                            .resizable()
+                                            .frame(width: 40, height: 40)
+                                            .offset(game.donuts[row][col].offset)
+                                            .gesture(dragGesture(r: row, c: col))
+                                    }
                                 }
                             } // ForEach_col End
                         }
@@ -120,19 +150,16 @@ struct ContentView: View {
                 // 時間
                 timeBarView(secondElapse: $game.secondElapse, elapsedTime: $game.elapsedTime , timeUpSecond: game.timeUpSecond)
                 
-                Spacer()
+//                Spacer()
             } // content VStack END
             
-            if game.timeUp{
+            if game.timeUp{ // 結算畫面
                 ResultView(game: game, showStartView: $showStartView, stateStr: $stateStr)
             }
         } // ZStack END
         .fullScreenCover(isPresented: $showStartView, content: {
             StartView(game: game, showStartView: $showStartView, stateStr: $stateStr)
         })
-        .onAppear{
-            game.initialGame()
-        }
     }
 }
 
@@ -250,7 +277,7 @@ struct timeBarView: View{
                     .padding()
                 
                 Rectangle()
-                    .fill(milkChocolate_color)
+                    .fill(cream_color)
                     .frame(width: 260, height: 30)
                     .cornerRadius(15)
                     .offset(x: 10)
