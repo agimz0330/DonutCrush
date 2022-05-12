@@ -23,6 +23,7 @@ struct Donut{
 //    var isAppear: Bool = false
     var offset: CGSize = CGSize.zero
     var direction: Direction = Direction.none
+    var isHint: Bool = false
 }
 enum Direction {
     case right, left, up, down, none
@@ -47,6 +48,7 @@ class Game: ObservableObject{
     let boardCol: Int = 9
     
     @Published var score: Int = 0
+    private var combo: Int = 0
     // 最高分
     @Published var highestScore: Int = 0
     // 計時
@@ -57,6 +59,13 @@ class Game: ObservableObject{
     @Published var timeUp: Bool = false // 時間到
     let timeUpSecond: Int = 60 // 時間到的秒數
     
+    private var disappearGrids: [Grid] = [] // 可連線的格子
+    
+    private var noActTime: Int = 0
+    private var hintGrids: [Grid] = [] // 可交換的所有格子２個格子
+    private var chooseHint: Int = 0
+    var haveHint: Bool = false
+    
     func initialGame(){
         donuts = Array(repeating: Array(repeating: Donut(),
                                         count: boardCol),
@@ -65,11 +74,12 @@ class Game: ObservableObject{
         getHighestScore() // set highest score
         timeUp = false
         score = 0
+        combo = 0
         elapsedTime = 0
         secondElapse = 0
+        noActTime = 0
         
         randomBoard()
-        
     }
     
     func randomBoard(){
@@ -83,9 +93,11 @@ class Game: ObservableObject{
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1){
-            self.disappearGrid(comboTimes: 0) // 消除連線的格子
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5){
+            self.combo = 0
+            self.disappearGrid() // 消除連線的格子
         }
+        
     }
     
     func startTimer(){
@@ -96,7 +108,14 @@ class Game: ObservableObject{
             if let self = self,
                let startDate = self.startDate{
                 self.secondElapse = Int(round(timer.fireDate.timeIntervalSince1970 - startDate.timeIntervalSince1970))
+                
+                self.noActTime += 1
+                if self.noActTime == 5{
+                    self.haveHint = self.getHint()
+                }
+                
                 if self.elapsedTime + self.secondElapse == self.timeUpSecond{ // 時間到
+                    self.stopTimer()
                     self.endGame()
                 }
             }
@@ -216,13 +235,14 @@ class Game: ObservableObject{
         donuts[row][col].direction = .none
         donuts[row][col].offset = .zero
         
-        disappearGrid(comboTimes: 1) // 消除連線的格子
+        combo = 1
+        if haveDisappear(){
+            disappearGrid() // 消除連線的格子
+        }
     }
     
-    func disappearGrid(comboTimes: Int){ // 消除連線的格子
-        var disappearGrids: [Grid] = [] // 可連線的格子
-        var addScore = 0
-        
+    func haveDisappear() -> Bool{ // 是否有可連線
+        disappearGrids = [] // 可連線的格子
         for re_row in 0..<boardRow{
             let row = boardRow - re_row - 1
             for col in 0..<boardCol{
@@ -231,38 +251,53 @@ class Game: ObservableObject{
                 }
             }
         }
+        if disappearGrids.count > 0{return true}
+        else {return false}
+    }
+    
+    func disappearGrid(){ // 消除連線的格子
+        var addScore = 0
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
-            for grid in disappearGrids{
+            for grid in self.disappearGrids{
                 self.donuts[grid.row][grid.col].value = 0
             }
         }
-        print("combo", comboTimes)
-        addScore = (disappearGrids.count) * comboTimes
+        
+        // 加分
+        addScore = (disappearGrids.count) * combo
         for i in 0..<addScore{
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1 * Double(i)){
                 self.score += 1
             }
         }
+        
+        if haveHint{
+            disappearHint()
+        }
+        noActTime = 0
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3){
-            self.dropDown(comboTimes: comboTimes)
+            self.dropDown()
         }
     }
     
-    func dropDown(comboTimes: Int){
+    func dropDown(){
         for col in 0..<boardCol{
             var dropCount = 0
             
             for re_row in 0..<boardRow{
-                let row = boardRow - re_row - 1
+                let row = boardRow - re_row - 1 // 由下往上檢查空格個數
                 
                 if dropCount != 0 && donuts[row][col].value != 0 {
+                    // 下方空格子 由上方的物品代替，靠offset暫時留在原格
                     donuts[row+dropCount][col].value = donuts[row][col].value
                     donuts[row+dropCount][col].offset.height = CGFloat(-dropCount * 40)
                     
-                    if row-dropCount >= 0{
+                    if row-dropCount >= 0{ // 被代替的格子再往上代替別格
                         donuts[row][col].value = donuts[row-dropCount][col].value
                     }
-                    else {
+                    else { // 上方沒格子 產生一個新物品
                         donuts[row][col].value = Int.random(in: 1...12)
                     }
                     donuts[row][col].offset.height = CGFloat(-dropCount * 40)
@@ -270,19 +305,15 @@ class Game: ObservableObject{
                 
                 if donuts[row][col].value == 0{
                     dropCount += 1
-                    if row < dropCount{
-                        donuts[row][col].value = Int.random(in: 1...12)
-                        donuts[row][col].offset.height = CGFloat(-dropCount * 40)
-                    }
                 }
             } // for row end
             
             for row in 0..<boardRow{
-                if donuts[row][col].value == 0{
+                if donuts[row][col].value == 0{ // 針對最上方未填滿的格子
                     donuts[row][col].value = Int.random(in: 1...12)
                     donuts[row][col].offset.height = CGFloat(-dropCount * 40)
                 }
-                
+                // 掉落到新位置
                 withAnimation(.linear){
                     donuts[row][col].offset.height = 0
                 }
@@ -290,7 +321,74 @@ class Game: ObservableObject{
         } // for col end
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5){
-            self.disappearGrid(comboTimes: comboTimes+1)
+            if self.haveDisappear(){ // 有多次消除
+                self.combo += 1
+                self.disappearGrid()
+            }
         }
     } // func dropDown end
+    
+    func getHint() -> Bool{
+        hintGrids = []
+        for r in 0..<boardRow{
+            for c in 0..<boardCol{
+                if (r+c)%2 == 0{
+                    // 朝四個方向檢查
+                    if c < boardCol-1{ // ->
+                        donuts[r][c].direction = Direction.right
+                        if canSwipe(row: r, col: c){
+                            hintGrids.append(Grid(r: r, c: c))
+                            hintGrids.append(Grid(r: r, c: c+1))
+                        }
+                    }
+                    if c > 0{ // <-
+                        donuts[r][c].direction = Direction.left
+                        if canSwipe(row: r, col: c){
+                            hintGrids.append(Grid(r: r, c: c))
+                            hintGrids.append(Grid(r: r, c: c-1))
+                        }
+                    }
+                    if r > 0{ // 上
+                        donuts[r][c].direction = Direction.up
+                        if canSwipe(row: r, col: c){
+                            hintGrids.append(Grid(r: r, c: c))
+                            hintGrids.append(Grid(r: r-1, c: c))
+                        }
+                    }
+                    if r < boardRow-1{ // 下
+                        donuts[r][c].direction = Direction.down
+                        if canSwipe(row: r, col: c){
+                            hintGrids.append(Grid(r: r, c: c))
+                            hintGrids.append(Grid(r: r+1, c: c))
+                        }
+                    }
+                    donuts[r][c].direction = Direction.none
+                }
+            } // for col end
+        } // for row end
+        
+        let hintCount = hintGrids.count / 2
+        if hintCount == 0{
+            randomBoard()
+            return false // 沒有可交換的
+        }else{
+            chooseHint = Int.random(in: 0..<hintCount)
+            let grid1 = hintGrids[chooseHint*2]
+            let grid2 = hintGrids[chooseHint*2+1]
+            
+            donuts[grid1.row][grid1.col].isHint = true
+            donuts[grid2.row][grid2.col].isHint = true
+            
+            return true
+        }
+    }
+    
+    func disappearHint(){
+        let grid1 = hintGrids[chooseHint*2]
+        let grid2 = hintGrids[chooseHint*2+1]
+        
+        donuts[grid1.row][grid1.col].isHint = false
+        donuts[grid2.row][grid2.col].isHint = false
+        
+    }
 }

@@ -57,7 +57,10 @@ struct StartView: View {
                         Button(action: {
                             showStartView = false
                             game.startTimer()
-                            game.initialGame()
+                            
+                            if stateStr == "Welcome"{
+                                game.initialGame()
+                            }
                         }, label: {
                             Rectangle()
                                 .fill(caputMortuum_color)

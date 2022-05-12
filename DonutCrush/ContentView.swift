@@ -10,12 +10,6 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var game: Game = Game()
     
-    @State private var offset = CGSize.zero
-    @State private var previousOffset = CGSize.zero
-    
-    @State private var offset2 = CGSize.zero
-    @State private var previousOffset2 = CGSize.zero
-    
     @State private var showStartView: Bool = true
     @State private var stateStr: String = "Welcome"
     @State private var showResultView: Bool = false
@@ -127,14 +121,22 @@ struct ContentView: View {
                     ForEach(0..<game.boardRow){ row in
                         HStack(spacing: 0){
                             
-                            ForEach(1..<game.boardCol){col in 
+                            ForEach(0..<game.boardCol){col in 
                                 ZStack{
-                                    deer_color
+                                    deer_color // 格子
                                         .frame(width: 40, height: 40)
                                         .border(cream_color)
                                         .opacity(0.6)
+                                    
+                                    if game.donuts[row][col].isHint{
+                                        Rectangle()
+                                            .fill(Color.white)
+                                            .blur(radius: 10)
+                                            .frame(width: 40, height: 40)
+                                            .scaleEffect(1.2)
+                                    }
 
-                                    if game.donuts[row][col].value > 0{
+                                    if game.donuts[row][col].value > 0{ // 甜甜圈
                                         Image("donut\(game.donuts[row][col].value)")
                                             .resizable()
                                             .frame(width: 40, height: 40)
@@ -227,9 +229,6 @@ struct ResultView: View{
                 })
             } // VStack END
             .offset(y: 60)
-        }
-        .onAppear{
-            game.stopTimer()
         }
     }
 }
